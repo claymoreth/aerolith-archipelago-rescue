@@ -26,7 +26,7 @@ if (existsSync(shotsDir)) {
   cpSync(shotsDir, join(out, 'screenshots'), { recursive: true });
 }
 
-const dossier = await buildDossier(out, {
+const dossier = buildDossier(out, {
   text_max_bytes: 163840,
   screenshots: { max: 4, max_bytes: 262144 },
   game_max_files: 993,
@@ -34,5 +34,8 @@ const dossier = await buildDossier(out, {
   game_path_max_bytes: 1000,
 });
 
-writeFileSync(join(out, 'dossier.json'), JSON.stringify(dossier, null, 2) + '\n');
+// buildDossier returns the dossier bytes (a Uint8Array): write them raw.
+// (JSON.stringify on a Uint8Array would serialise it as {"0": 123, ...}
+// and blow past the 1.5 MiB dossier cap.)
+writeFileSync(join(out, 'dossier.json'), dossier);
 console.log('AEROLITH dossier written to ' + join(out, 'dossier.json'));

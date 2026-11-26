@@ -54,7 +54,11 @@ export function applyShot(api, name, seed) {
   } else if (name === 'cockpit') {
     // Over Home Island looking at the volcano (bearing ~41 deg from
     // here): terrain ahead below, volcano dead ahead, dash in frame.
-    posePlane(api, 0, 100, -100, 41, 1, 0, 74, 0.7);
+    // Pitched -6 deg (gentle descent toward the volcano): the panel is
+    // fixed to the plane so it stays put, while the volcano rises 6 deg
+    // in frame and clears the top of the panel instead of hiding
+    // behind it.
+    posePlane(api, 0, 100, -100, 41, -6, 0, 74, 0.7);
     api.setCameraMode('cockpit');
     api.startMissionForShot('volcano-rescue');
     api.hudShow();

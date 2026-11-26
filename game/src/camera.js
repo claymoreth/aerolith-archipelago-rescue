@@ -43,10 +43,13 @@ export function createCameraRig(camera) {
       const pitch = degToRad(flight.pitchDeg);
       const roll = degToRad(flight.rollDeg);
       const [ox, oy, oz] = CAMERA.cockpitOffset;
-      // Rotate the cockpit offset by heading so it stays glued to the plane.
-      const cx = Math.sin(heading) * oz + Math.cos(heading) * ox;
-      const cz = Math.cos(heading) * oz - Math.sin(heading) * ox;
-      camera.position.set(flight.x + cx, flight.y + oy, flight.z + cz);
+      // The camera is the pilot's head: rigidly attached to the plane,
+      // so its position rotates with heading, pitch AND roll exactly
+      // like the airframe. (The old heading-only offset let the camera
+      // drift outside the canopy glass on a pitched-down shot, and the
+      // glass then washed out the whole view.)
+      const off = new THREE.Vector3(ox, oy, oz).applyEuler(new THREE.Euler(-pitch, heading, roll, 'YXZ'));
+      camera.position.set(flight.x + off.x, flight.y + off.y, flight.z + off.z);
       camera.rotation.order = 'YXZ';
       // Three.js cameras face -Z by default, the plane nose faces +Z at
       // heading 0, so the cockpit must look along PI + heading.

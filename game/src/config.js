@@ -57,7 +57,7 @@ export const CAMERA = {
   chaseHeight: 6.5,
   chaseLookAhead: 18,
   smooth: 5.5,
-  cockpitOffset: [0, 1.5, 0.6],
+  cockpitOffset: [0, 1.06, 0.35],
 };
 
 export const COLORS = {

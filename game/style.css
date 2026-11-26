@@ -22,7 +22,6 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
 .fill.fuel { background: linear-gradient(90deg, #0e9aa7, #37d67a); width: 100%; }
 .fill.fuel.low { background: linear-gradient(90deg, #ff5a4a, #ffb020); }
 .fill.throttle { background: linear-gradient(90deg, #ffb020, #ff7a1a); width: 0%; }
-.hud-fps { font-size: 11px; color: #8fd8ef; opacity: 0.85; }
 #minimap { position: absolute; right: 14px; bottom: 56px; width: 160px; height: 160px; border: 1px solid rgba(120, 220, 255, 0.4); border-radius: 10px; background: rgba(8, 28, 40, 0.7); }
 #hud-warn { position: absolute; top: 132px; left: 50%; transform: translateX(-50%); background: rgba(120, 10, 10, 0.85); border: 1px solid #ff5a4a; color: #fff; font-weight: 800; letter-spacing: 0.06em; padding: 9px 18px; border-radius: 8px; animation: blink 0.6s steps(2) infinite; white-space: nowrap; }
 #hud-toast { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(8, 28, 40, 0.8); border: 1px solid rgba(255, 201, 77, 0.6); color: #ffe9a8; padding: 8px 16px; border-radius: 8px; font-size: 14px; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }

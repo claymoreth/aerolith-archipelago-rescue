@@ -214,14 +214,13 @@ function animate(nowMs) {
   last = nowMs;
   elapsed = now;
 
-  // FPS counter (1 s window).
+  // Internal frame counter (1 s window) for the automation handle only;
+  // there is no FPS readout in the HUD.
   frames++;
   if (now - fpsTime >= 1) {
     fps = frames;
     frames = 0;
     fpsTime = now;
-    const fpsEl = $('hud-fps');
-    if (fpsEl) fpsEl.textContent = fps + ' FPS';
   }
 
   handleKeys();
@@ -304,6 +303,14 @@ function animate(nowMs) {
     if (world.lamp) world.lamp.material.color.setHex(Math.sin(now * 2.4) > 0 ? 0xffc94d : 0x8a7a3a);
     if (world.crater) world.crater.material.color.setHex(Math.sin(now * 1.8) > 0 ? 0xff5a1f : 0xd63d12);
   }
+
+  // Cockpit interior (panel, gauges, struts) exists only in cockpit view.
+  if (plane.cockpitInterior) plane.cockpitInterior.visible = cameraMode === 'cockpit';
+  // The canopy frame torus sits 0.5 m ahead of the cockpit camera, so in
+  // cockpit view it reads as a giant black roll cage across the sky;
+  // hide it there (the A-pillars frame the windscreen instead) and keep
+  // it for the exterior/chase view.
+  if (plane.canopyFrame) plane.canopyFrame.visible = cameraMode !== 'cockpit';
 
   input.endFrame();
   renderer.render(scene, camera);

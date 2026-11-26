@@ -48,26 +48,148 @@ export function buildAircraft() {
   canopyFrame.scale.set(1, 0.8, 1);
   group.add(canopyFrame);
 
-  // Cockpit dashboard: a low, narrow dark strip + three tiny glowing
-  // gauges, just above the nose line so the horizon stays clear from
-  // the cockpit camera (a tall/close panel blocks the whole view).
-  // Kept thin and near the nose: from the cockpit a deep/tilted panel
-  // reads as a huge black slab.
-  const dash = new THREE.Group();
-  const dashPanel = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.1, 0.12), lam(0x1d2126));
-  dashPanel.position.set(0, 0.88, 2.6);
-  dashPanel.rotation.x = -0.1;
-  dash.add(dashPanel);
-  const gaugeCols = [0x2fd6c8, 0xffb020, 0x7ddc4f];
-  gaugeCols.forEach((c, i) => {
-    const g = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03, 10, 8),
-      new THREE.MeshBasicMaterial({ color: c }),
+  // Cockpit interior: a real instrument panel + canopy A-pillars, shown
+  // only from the cockpit camera (main.js toggles visibility by camera
+  // mode). In chase view the plane keeps its clean exterior; from the
+  // cockpit the panel, gauges and struts must read instantly. The panel
+  // top stays below the pilot's eye line so the horizon, terrain and
+  // volcano stay visible above it, and the red nose shows below it.
+  const cockpitInterior = new THREE.Group();
+  cockpitInterior.name = 'cockpit-interior';
+  cockpitInterior.visible = false;
+  const panelMat = new THREE.MeshBasicMaterial({ color: 0x1d2126 });
+  const strutMat = new THREE.MeshBasicMaterial({ color: 0x14181d });
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(1.32, 0.4, 0.1), panelMat);
+  panel.position.set(0, 0.81, 2.28);
+  cockpitInterior.add(panel);
+  // Glareshield: padded lip across the top of the panel.
+  const glare = new THREE.Mesh(new THREE.BoxGeometry(1.34, 0.06, 0.28), panelMat);
+  glare.position.set(0, 1.01, 2.2);
+  cockpitInterior.add(glare);
+
+  // Round gauge faces are canvas textures: dark lit dial, white ticks
+  // and numbers. The face is DoubleSide (the pilot sees its -Z side)
+  // with repeat.x = -1 so the numbers read correctly from the cockpit.
+  function gaugeFace(spec) {
+    const S = 256;
+    const cv = document.createElement('canvas');
+    cv.width = S; cv.height = S;
+    const ctx = cv.getContext('2d');
+    const cx = S / 2, cy = S / 2;
+    ctx.fillStyle = '#0d141b';
+    ctx.beginPath(); ctx.arc(cx, cy, 126, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3a4a55'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.arc(cx, cy, 120, 0, Math.PI * 2); ctx.stroke();
+    const rad = (d) => (d * Math.PI) / 180;
+    // Canvas angle for a value: value gauges map fraction 0..1 onto
+    // canvas 135..405 deg (min lower-left, max lower-right); the
+    // heading gauge maps 0..360 deg onto canvas 270..630 deg (N up).
+    const angleFor = (v) => (spec.compass ? 270 + v : 135 + 270 * v);
+    const nMinor = spec.compass ? 36 : 27;
+    ctx.strokeStyle = '#cfe8ef';
+    for (let i = 0; i <= nMinor; i++) {
+      const v = spec.compass ? (i / nMinor) * 360 : i / nMinor;
+      const a = rad(angleFor(v));
+      const major = i % (spec.compass ? 3 : 9) === 0;
+      const r1 = major ? 96 : 106, r2 = 114;
+      ctx.lineWidth = major ? 5 : 3;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#eef6f8';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const [v, text] of spec.labels) {
+      const a = rad(angleFor(v));
+      ctx.fillText(text, cx + Math.cos(a) * 74, cy + Math.sin(a) * 74);
+    }
+    ctx.fillStyle = '#ffb020';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText(spec.tag, cx, cy + 92);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.repeat.x = -1;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    return tex;
+  }
+
+  // One round gauge: rim + lit face + needle pivoting at the centre.
+  // Returns the needle group; its rotation.z is driven from flight
+  // state in update() below.
+  function buildGauge(spec, x, y, r) {
+    const g = new THREE.Group();
+    g.position.set(x, y, 2.22);
+    const rim = new THREE.Mesh(
+      new THREE.TorusGeometry(r, r * 0.14, 8, 28),
+      new THREE.MeshBasicMaterial({ color: 0x3a4a55 }),
     );
-    g.position.set((i - 1) * 0.3, 0.95, 2.62);
-    dash.add(g);
-  });
-  group.add(dash);
+    g.add(rim);
+    const face = new THREE.Mesh(
+      new THREE.CircleGeometry(r * 0.96, 28),
+      new THREE.MeshBasicMaterial({ map: gaugeFace(spec), side: THREE.DoubleSide }),
+    );
+    g.add(face);
+    const needle = new THREE.Group();
+    const blade = new THREE.Mesh(
+      new THREE.BoxGeometry(r * 0.13, r * 0.82, 0.012),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    );
+    blade.position.y = r * 0.3;
+    needle.add(blade);
+    const hub = new THREE.Mesh(
+      new THREE.SphereGeometry(r * 0.16, 10, 8),
+      new THREE.MeshBasicMaterial({ color: 0xff5a4a }),
+    );
+    needle.add(hub);
+    g.add(needle);
+    cockpitInterior.add(g);
+    return needle;
+  }
+
+  const needles = {
+    airspeed: buildGauge(
+      { labels: [[0, '0'], [1 / 6, '20'], [2 / 6, '40'], [3 / 6, '60'], [4 / 6, '80'], [5 / 6, '100'], [1, '120']], tag: 'KT' },
+      -0.3, 0.81, 0.15,
+    ),
+    altitude: buildGauge(
+      { labels: [[0, '0'], [0.2, '2'], [0.4, '4'], [0.6, '6'], [0.8, '8'], [1, '10']], tag: 'FT x100' },
+      0, 0.81, 0.15,
+    ),
+    heading: buildGauge(
+      { compass: true, labels: [[0, 'N'], [30, '3'], [60, '6'], [90, 'E'], [120, '12'], [150, '15'], [180, 'S'], [210, '21'], [240, '24'], [270, 'W'], [300, '30'], [330, '33']], tag: 'HDG' },
+      0.3, 0.81, 0.15,
+    ),
+    fuel: buildGauge(
+      { labels: [[0, 'E'], [1, 'F']], tag: 'FUEL' },
+      -0.55, 0.81, 0.095,
+    ),
+    throttle: buildGauge(
+      { labels: [[0, '0'], [0.5, '50'], [1, '100']], tag: 'THR' },
+      0.55, 0.81, 0.095,
+    ),
+  };
+
+  // Canopy A-pillars: dark struts from the panel top corners up and
+  // back toward the pilot, framing the windscreen at the view edges.
+  function strutBetween(a, b, r) {
+    const dir = new THREE.Vector3().subVectors(b, a);
+    const len = dir.length();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), strutMat);
+    m.position.copy(a).addScaledVector(dir, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    return m;
+  }
+  for (const s of [-1, 1]) {
+    cockpitInterior.add(strutBetween(
+      new THREE.Vector3(s * 0.6, 1.0, 2.2),
+      new THREE.Vector3(s * 0.5, 1.16, 0.6),
+      0.045,
+    ));
+  }
+  group.add(cockpitInterior);
 
   // Main wings: low wing, slight dihedral, teal tips.
   const wingGeo = new THREE.BoxGeometry(9.6, 0.18, 1.7);
@@ -167,6 +289,8 @@ export function buildAircraft() {
     gearLeft,
     gearRight,
     nose,
+    cockpitInterior,
+    canopyFrame,
     update(dt, flight) {
       propeller.rotation.z -= flight.propellerSpeed * dt;
       const rpm = Math.min(1, flight.propellerSpeed / 40);
@@ -174,6 +298,17 @@ export function buildAircraft() {
       // Gear is fixed on this bush plane; keep the refs for shots/HUD.
       gearLeft.visible = true;
       gearRight.visible = true;
+      // Cockpit needles. rotation.z is CCW seen from the nose; from the
+      // pilot's seat it reads CCW-from-up, so value 0 sits lower-left
+      // and full scale lower-right; the heading needle points at the
+      // heading, clockwise from up.
+      const clamp01 = (v) => Math.max(0, Math.min(1, v));
+      const valueAngle = (f) => (1 - 2 * clamp01(f)) * 2.356;
+      needles.airspeed.rotation.z = valueAngle(flight.speed / 120);
+      needles.altitude.rotation.z = valueAngle((flight.y * 3.28) / 1000);
+      needles.heading.rotation.z = -THREE.MathUtils.degToRad(flight.headingDeg);
+      needles.fuel.rotation.z = valueAngle(flight.fuel / 100);
+      needles.throttle.rotation.z = valueAngle(flight.throttle);
     },
   };
 }

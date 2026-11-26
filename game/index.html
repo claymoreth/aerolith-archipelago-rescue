@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AEROLITH: Archipelago Rescue</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- Flight HUD -->
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-box" id="hud-speed-box"><span class="hud-label">SPEED</span><span class="hud-value" id="hud-speed">0 kt</span></div>
+    <div class="hud-box"><span class="hud-label">ALTITUDE</span><span class="hud-value" id="hud-alt">0 ft</span></div>
+    <div class="hud-box"><span class="hud-label">HEADING</span><span class="hud-value" id="hud-heading">000°</span><span class="hud-sub" id="hud-compass">N 000°</span></div>
+    <div class="hud-box"><span class="hud-label">TIME</span><span class="hud-value" id="hud-timer">--:--</span></div>
+    <div class="hud-box"><span class="hud-label">SCORE</span><span class="hud-value" id="hud-score">SCORE 0</span></div>
+  </div>
+  <div class="hud-objective-bar">
+    <span class="hud-label">OBJECTIVE</span>
+    <span id="hud-objective">Explore the archipelago</span>
+    <span id="hud-progress" class="hud-progress">—</span>
+  </div>
+  <div class="hud-left">
+    <div class="gauge"><span class="hud-label" id="hud-fuel-text">FUEL 100%</span><div class="bar"><div id="hud-fuel-fill" class="fill fuel"></div></div></div>
+    <div class="gauge"><span class="hud-label">THROTTLE</span><div class="bar"><div id="hud-throttle-fill" class="fill throttle"></div></div></div>
+    <div class="hud-fps" id="hud-fps">— FPS</div>
+  </div>
+  <canvas id="minimap" width="160" height="160"></canvas>
+  <div id="hud-warn" class="hidden"></div>
+  <div id="hud-toast" class="hidden"></div>
+  <div class="hud-help">W/S throttle · Arrows pitch/roll · Q/E yaw · Space drop · C camera · P pause · R restart · M mute</div>
+</div>
+
+<!-- Main menu -->
+<div id="menu">
+  <div class="menu-card">
+    <div class="menu-kicker">AEROLITH</div>
+    <h1>ARCHIPELAGO RESCUE</h1>
+    <p class="menu-sub">Fly the K-1 Kestrel across a tropical archipelago. Thread the rings, drop the supplies, rescue the hiker — and bring her home.</p>
+    <div class="mission-list">
+      <button class="mission selected" data-mission="ring-run"><b>1 · Ring Run</b><span>5 glowing rings · 4:00</span></button>
+      <button class="mission" data-mission="supply-drop"><b>2 · Supply Drop</b><span>Far Atoll drop zone · 5:00</span></button>
+      <button class="mission" data-mission="volcano-rescue"><b>3 · Volcano Rescue</b><span>Helipad pickup + precision landing · 6:00</span></button>
+      <button class="mission" data-mission="free-flight"><b>4 · Free Flight</b><span>No timer · explore</span></button>
+    </div>
+    <button id="btn-start" class="btn-primary">START FLIGHT</button>
+    <div class="menu-controls">
+      <span><b>W / S</b> throttle</span><span><b>↑ ↓</b> pitch</span><span><b>← →</b> roll</span><span><b>Q / E</b> yaw</span><span><b>Space</b> drop</span><span><b>C</b> cockpit</span><span><b>P</b> pause</span><span><b>R</b> restart</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause-screen" class="hidden overlay">
+  <div class="end-card">
+    <h2>PAUSED</h2>
+    <p>Take a breath. The islands will wait.</p>
+    <button id="btn-resume" class="btn-primary">RESUME (P)</button>
+  </div>
+</div>
+
+<!-- End screen -->
+<div id="end-screen" class="hidden overlay">
+  <div class="end-card">
+    <h2 id="end-title">MISSION COMPLETE</h2>
+    <p id="end-detail"></p>
+    <div class="end-actions">
+      <button id="btn-restart" class="btn-primary">FLY AGAIN (R)</button>
+      <button id="btn-menu" class="btn-secondary">MENU (Esc)</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

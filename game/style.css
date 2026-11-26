@@ -1,0 +1,64 @@
+/* AEROLITH — flight-instrument styling: dark glass, amber/cyan accents. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #0a2436; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; color: #eef6f8; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.hud-top { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+.hud-box { background: rgba(8, 28, 40, 0.72); border: 1px solid rgba(120, 220, 255, 0.35); border-radius: 10px; padding: 8px 14px; min-width: 96px; text-align: center; backdrop-filter: blur(4px); }
+.hud-label { display: block; font-size: 10px; letter-spacing: 0.18em; color: #8fd8ef; }
+.hud-value { display: block; font-size: 22px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+.hud-sub { display: block; font-size: 11px; color: #ffb020; }
+#hud-timer.urgent { color: #ff5a4a; animation: blink 0.7s steps(2) infinite; }
+.hud-objective-bar { position: absolute; top: 86px; left: 50%; transform: translateX(-50%); background: rgba(8, 28, 40, 0.72); border: 1px solid rgba(255, 176, 32, 0.45); border-radius: 8px; padding: 7px 16px; font-size: 14px; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
+.hud-objective-bar .hud-label { display: inline; margin-right: 8px; color: #ffb020; }
+.hud-progress { margin-left: 12px; color: #8fd8ef; font-weight: 700; }
+.hud-left { position: absolute; left: 14px; bottom: 56px; width: 210px; display: flex; flex-direction: column; gap: 10px; }
+.gauge { background: rgba(8, 28, 40, 0.72); border: 1px solid rgba(120, 220, 255, 0.3); border-radius: 8px; padding: 8px 10px; }
+.bar { height: 10px; background: rgba(255, 255, 255, 0.14); border-radius: 5px; margin-top: 5px; overflow: hidden; }
+.fill { height: 100%; border-radius: 5px; transition: width 0.15s linear; }
+.fill.fuel { background: linear-gradient(90deg, #0e9aa7, #37d67a); width: 100%; }
+.fill.fuel.low { background: linear-gradient(90deg, #ff5a4a, #ffb020); }
+.fill.throttle { background: linear-gradient(90deg, #ffb020, #ff7a1a); width: 0%; }
+.hud-fps { font-size: 11px; color: #8fd8ef; opacity: 0.85; }
+#minimap { position: absolute; right: 14px; bottom: 56px; width: 160px; height: 160px; border: 1px solid rgba(120, 220, 255, 0.4); border-radius: 10px; background: rgba(8, 28, 40, 0.7); }
+#hud-warn { position: absolute; top: 132px; left: 50%; transform: translateX(-50%); background: rgba(120, 10, 10, 0.85); border: 1px solid #ff5a4a; color: #fff; font-weight: 800; letter-spacing: 0.06em; padding: 9px 18px; border-radius: 8px; animation: blink 0.6s steps(2) infinite; white-space: nowrap; }
+#hud-toast { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(8, 28, 40, 0.8); border: 1px solid rgba(255, 201, 77, 0.6); color: #ffe9a8; padding: 8px 16px; border-radius: 8px; font-size: 14px; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
+.hud-help { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 11px; color: rgba(238, 246, 248, 0.75); background: rgba(8, 28, 40, 0.55); padding: 5px 12px; border-radius: 6px; white-space: nowrap; }
+@keyframes blink { 50% { opacity: 0.35; } }
+
+/* ---------- Menu / overlays ---------- */
+#menu { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(6, 30, 46, 0.25), rgba(6, 30, 46, 0.78)); }
+.menu-card { width: min(620px, 92vw); background: rgba(8, 28, 40, 0.86); border: 1px solid rgba(120, 220, 255, 0.35); border-radius: 18px; padding: 28px 30px; text-align: center; backdrop-filter: blur(6px); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5); }
+.menu-kicker { letter-spacing: 0.5em; color: #ffb020; font-weight: 800; font-size: 13px; }
+.menu-card h1 { margin: 6px 0 8px; font-size: 40px; letter-spacing: 0.04em; }
+.menu-sub { color: #cfe8ef; font-size: 15px; line-height: 1.5; margin: 0 0 18px; }
+.mission-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.mission { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(120, 220, 255, 0.3); border-radius: 10px; color: #eef6f8; padding: 12px; cursor: pointer; text-align: left; font-family: inherit; }
+.mission b { display: block; font-size: 15px; }
+.mission span { font-size: 12px; color: #8fd8ef; }
+.mission.selected { border-color: #ffb020; background: rgba(255, 176, 32, 0.16); box-shadow: 0 0 0 1px #ffb020 inset; }
+.mission:hover { border-color: #8fd8ef; }
+.btn-primary { background: #ffb020; color: #1a1200; border: none; border-radius: 10px; padding: 13px 26px; font-size: 16px; font-weight: 800; letter-spacing: 0.08em; cursor: pointer; }
+.btn-primary:hover { background: #ffc94d; }
+.btn-secondary { background: transparent; color: #eef6f8; border: 1px solid rgba(238, 246, 248, 0.5); border-radius: 10px; padding: 13px 20px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.menu-controls { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: 12px; color: #cfe8ef; }
+.menu-controls b { color: #ffb020; }
+.overlay { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(6, 30, 46, 0.6); }
+.end-card { width: min(520px, 92vw); background: rgba(8, 28, 40, 0.92); border: 1px solid rgba(120, 220, 255, 0.35); border-radius: 18px; padding: 26px 28px; text-align: center; }
+.end-card h2 { margin: 0 0 10px; font-size: 30px; letter-spacing: 0.05em; }
+.end-card p { color: #cfe8ef; line-height: 1.55; }
+.end-actions { display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+
+@media (max-width: 720px) {
+  .hud-top { flex-wrap: wrap; justify-content: center; width: 94vw; }
+  .hud-box { min-width: 78px; padding: 6px 8px; }
+  .hud-value { font-size: 17px; }
+  #minimap { width: 110px; height: 110px; }
+  .hud-left { width: 160px; }
+  .menu-card h1 { font-size: 28px; }
+  .mission-list { grid-template-columns: 1fr; }
+  .hud-help { display: none; }
+}
